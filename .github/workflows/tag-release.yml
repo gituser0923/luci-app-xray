@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build the IPK packages
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        make menuconfig
+        make -j$(nproc) V=s
+
+    - name: Upload IPKs
+      uses: actions/upload-artifact@v2
+      with:
+        name: ipks
+        path: bin/packages/
